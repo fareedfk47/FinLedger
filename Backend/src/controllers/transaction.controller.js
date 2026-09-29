@@ -161,7 +161,7 @@ async function deposit(req, res) {
             status: "completed",
           },
         ],
-        { session },
+        { session }, 
       );
 
       createdTransaction = transaction[0];
