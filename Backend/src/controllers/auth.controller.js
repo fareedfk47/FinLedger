@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const emailService = require("../services/email.service");
 const auditService = require("../services/audit.service");
 
-
 async function registerUser(req, res) {
   try {
     const { email, name, password, confirmPassword } = req.body;
@@ -85,7 +84,7 @@ async function registerUser(req, res) {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -173,8 +172,7 @@ async function loginUser(req, res) {
     // Check whether the 15-minute failed-login window has expired
     if (user.failedLoginAt) {
       const fifteenMinutes = 15 * 60 * 1000;
-      const timeSinceFirstFailure =
-        Date.now() - user.failedLoginAt.getTime();
+      const timeSinceFirstFailure = Date.now() - user.failedLoginAt.getTime();
 
       if (timeSinceFirstFailure >= fifteenMinutes) {
         user.failedLoginAttempts = 0;
@@ -279,7 +277,7 @@ async function loginUser(req, res) {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -326,10 +324,11 @@ async function logoutUser(req, res) {
     const userId = req.user.id;
 
     // Clear JWT cookie
-    res.clearCookie("token", {
+    res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     // Create logout audit log
@@ -361,10 +360,8 @@ async function logoutUser(req, res) {
   }
 }
 
-
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
 };
-
