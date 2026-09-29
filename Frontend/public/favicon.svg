@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <linearGradient id="finledgerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#0037b0"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Container -->
+  <rect width="48" height="48" rx="12" fill="url(#finledgerGrad)"/>
+  
+  <!-- Bank Emblem: Pediment (Roof) -->
+  <path d="M24 10 L10 18 L38 18 Z" fill="#ffffff"/>
+  
+  <!-- Architrave Beam -->
+  <rect x="10" y="19" width="28" height="2" rx="0.5" fill="#ffffff" opacity="0.9"/>
+  
+  <!-- Columns (4 Pillars) -->
+  <rect x="13" y="23" width="3.5" height="11" rx="1" fill="#ffffff"/>
+  <rect x="19" y="23" width="3.5" height="11" rx="1" fill="#ffffff"/>
+  <rect x="25.5" y="23" width="3.5" height="11" rx="1" fill="#ffffff"/>
+  <rect x="31.5" y="23" width="3.5" height="11" rx="1" fill="#ffffff"/>
+  
+  <!-- Stylobate (Base) -->
+  <rect x="10" y="35" width="28" height="3" rx="1" fill="#ffffff"/>
+</svg>

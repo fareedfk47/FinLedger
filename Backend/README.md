@@ -439,6 +439,12 @@ Planned or possible improvements include:
 
 ---
 
+## Acknowledgments
+
+* **AI Assistance:** Architectural design review and debugging assistance provided by **ChatGPT** and **Claude**.
+
+---
+
 ## Author
 
 **Fareed Khan**
