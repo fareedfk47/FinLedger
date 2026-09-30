@@ -6,8 +6,10 @@ The project provides an end-to-end banking application featuring authenticated s
 
 The user interface was crafted using **Stitch** (following the *Sovereign Ledger* fintech design system) and engineered into modular React components, with debugging and architectural assistance from **ChatGPT** and **Claude**.
 
-> **Project Status:** 🚧 Active Development  
-> Core backend APIs and modern frontend dashboard are fully implemented, connected, and verified.
+> **Project Status:** 🚀 Live in Production  
+> 🌐 **Live Web Application:** [https://fin-ledger-kappa.vercel.app](https://fin-ledger-kappa.vercel.app)  
+> ⚙️ **Backend REST API:** [https://finledger-1-6qag.onrender.com](https://finledger-1-6qag.onrender.com)  
+> 🩺 **API Health Check:** [https://finledger-1-6qag.onrender.com/api/health](https://finledger-1-6qag.onrender.com/api/health)
 
 ---
 
