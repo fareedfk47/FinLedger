@@ -42,9 +42,16 @@ function Login() {
       // 4. Navigate to dashboard
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      const message =
-        err.response?.data?.message ||
-        "Invalid email or password. Please check your credentials.";
+      let message = err.response?.data?.message;
+      if (!message) {
+        if (err.response?.status === 502 || err.response?.status === 504) {
+          message = "Backend server is waking up from sleep (Render free tier). Please wait ~30 seconds and try again.";
+        } else if (err.response?.status === 401) {
+          message = "Invalid email or password. Please check your credentials.";
+        } else {
+          message = "Unable to connect to the server. Please try again in a moment.";
+        }
+      }
       setError(message);
     } finally {
       setIsLoading(false);
