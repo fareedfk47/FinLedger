@@ -43,6 +43,14 @@ const transactionRouter = require("./routes/transaction.routes");
 /**
  * - Use Routes
  */
+app.get("/api/health", (req, res) => {
+  return res.status(200).json({
+    status: "ok",
+    service: "FinLedger API",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.use("/api/auth", authRouter);
 app.use("/api/accounts", accountRouter);
 app.use("/api/transactions", transactionRouter);
