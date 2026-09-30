@@ -21,7 +21,6 @@ FinLedger is organized as a clean multi-package workspace:
 FinLedger/
 ├── Backend/          # Node.js + Express REST API with MongoDB & Mongoose
 ├── Frontend/         # React 19 + Vite SPA with Redux Toolkit & Tailwind CSS
-├── stitch_finledger_banking_dashboard/  # UI/UX design source of truth (Stitch)
 └── README.md         # Repository root overview
 ```
 
