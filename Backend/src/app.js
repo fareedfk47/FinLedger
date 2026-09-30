@@ -5,12 +5,30 @@ const cors = require("cors");
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(express.json({ limit: "10kb" }));
 app.use(cookieParser());
 app.use(helmet());
+
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+  "http://localhost:3000",
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const isAllowed = allowedOrigins.some(
+        (o) => o === origin || o.replace(/\/$/, "") === origin.replace(/\/$/, "")
+      );
+      if (isAllowed || process.env.NODE_ENV !== "production") {
+        return callback(null, true);
+      }
+      return callback(new Error("CORS policy violation: origin not allowed"));
+    },
     credentials: true,
   }),
 );

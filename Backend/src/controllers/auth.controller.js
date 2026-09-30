@@ -324,11 +324,10 @@ async function logoutUser(req, res) {
     const userId = req.user.id;
 
     // Clear JWT cookie
-    res.cookie("token", token, {
+    res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     // Create logout audit log
