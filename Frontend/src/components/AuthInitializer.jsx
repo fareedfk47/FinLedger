@@ -1,28 +1,39 @@
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { setUser, clearUser } from "../store/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser, clearUser, setLoading } from "../store/authSlice";
 import { setAccounts } from "../store/accountsSlice";
 import { getMyAccounts } from "../services/accountService";
 
 /**
  * AuthInitializer
  *
- * Runs once on app mount. Calls GET /api/accounts to check if the
- * HTTP-only cookie is still valid (this doubles as a session check
- * since there is no /api/auth/me endpoint).
+ * Runs once on app mount to restore session from the HTTP-only cookie
+ * on a fresh page load or browser refresh.
  *
- * - 200 → set user + accounts in Redux (isAuthenticated = true)
- * - 401 → clear user (isAuthenticated = false, redirected by Axios interceptor)
- * - Other errors → clear user (treat as unauthenticated)
+ * - If Redux already has authenticated state (user just logged in), we
+ *   skip the server round-trip entirely — the login flow already
+ *   hydrated the store.
+ * - If Redux has no state (fresh load / page refresh), we call
+ *   GET /api/accounts to check if the cookie is still valid:
+ *     200 → set user + accounts in Redux (isAuthenticated = true)
+ *     401 → clear user (isAuthenticated = false)
  */
 function AuthInitializer({ children }) {
   const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
+    // Already authenticated (e.g. just logged in) — skip server check
+    if (isAuthenticated && user) {
+      dispatch(setLoading(false));
+      return;
+    }
+
+    // Fresh page load or refresh — verify session with server
     async function checkSession() {
       try {
         const data = await getMyAccounts();
-        // data = { user: { name, email }, accounts[] }
         dispatch(setUser(data.user));
         dispatch(setAccounts(data.accounts));
       } catch {
@@ -31,7 +42,8 @@ function AuthInitializer({ children }) {
     }
 
     checkSession();
-  }, [dispatch]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return children;
 }
