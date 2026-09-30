@@ -6,8 +6,9 @@ The interface is modeled after the **Stitch** *Sovereign Ledger* fintech design 
 
 Development, component architecture, and bug resolution were refined with technical and debugging assistance from **ChatGPT** and **Claude**.
 
-> **Project Status:** 🚀 Complete & Connected  
-> Fully integrated with the FinLedger Express REST API.
+> **Project Status:** 🚀 Live in Production  
+> 🌐 **Live Web Application:** [https://fin-ledger-kappa.vercel.app](https://fin-ledger-kappa.vercel.app)  
+> ⚙️ **Connected API:** [https://finledger-1-6qag.onrender.com/api](https://finledger-1-6qag.onrender.com/api)
 
 ---
 
