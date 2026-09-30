@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: finledger-api
+    runtime: node
+    rootDir: Backend
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: FRONTEND_URL
+        sync: false
+      - key: MONGOOSE_URI
+        sync: false
+      - key: JWT_SECRETKEY
+        sync: false
+      - key: CLIENT_ID
+        sync: false
+      - key: CLIENT_SECRET
+        sync: false
+      - key: EMAIL_USER
+        sync: false
