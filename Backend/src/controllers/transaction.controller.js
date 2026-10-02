@@ -199,7 +199,7 @@ async function deposit(req, res) {
       emailService.sendTransactionEmail(user.email, {
         type: "deposit",
         amount: depositAmount,
-        accountNumber: account.accountNumber,
+        accountNumber,
         balanceAfter: createdTransaction.balanceAfter,
         description: cleanDescription,
         date: createdTransaction.createdAt,
@@ -470,7 +470,7 @@ async function withdraw(req, res) {
       emailService.sendTransactionEmail(user.email, {
         type: "withdraw",
         amount: withdrawAmount,
-        accountNumber: account.accountNumber,
+        accountNumber,
         balanceAfter: createdTransaction.balanceAfter,
         description: cleanDescription,
         date: createdTransaction.createdAt,
