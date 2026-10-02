@@ -233,7 +233,9 @@ const sendTransactionEmail = async (userEmail, transactionDetails) => {
           })
         : "N/A";
 
-    const formattedDate = date ? new Date(date).toLocaleString("en-IN") : new Date().toLocaleString("en-IN");
+    const formattedDate = date
+      ? new Date(date).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+      : new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
 
     const subject = `FinLedger Alert: ${transactionType} of ${formattedAmount}`;
 
