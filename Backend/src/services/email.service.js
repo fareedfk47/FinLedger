@@ -2,34 +2,99 @@ require("dotenv").config();
 const nodemailer = require("nodemailer");
 
 // ============================================================
-// EMAIL TRANSPORTER (Gmail App Password / OAuth2)
+// HELPER: BUILD MIME RFC 2822 EMAIL FOR GMAIL REST API (HTTPS)
 // ============================================================
-const authConfig = process.env.EMAIL_PASS
-  ? {
+function buildMimeMessage(to, from, subject, text, html) {
+  const boundary = "b_" + Date.now();
+  const encodedSubject = "=?UTF-8?B?" + Buffer.from(subject).toString("base64") + "?=";
+
+  const lines = [
+    `From: ${from}`,
+    `To: ${to}`,
+    `Subject: ${encodedSubject}`,
+    "MIME-Version: 1.0",
+    `Content-Type: multipart/alternative; boundary=${boundary}`,
+    "",
+    `--${boundary}`,
+    "Content-Type: text/plain; charset=UTF-8",
+    "Content-Transfer-Encoding: 7bit",
+    "",
+    text,
+    "",
+    `--${boundary}`,
+    "Content-Type: text/html; charset=UTF-8",
+    "Content-Transfer-Encoding: 7bit",
+    "",
+    html,
+    "",
+    `--${boundary}--`,
+  ];
+
+  return Buffer.from(lines.join("\r\n"))
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+// ============================================================
+// GMAIL REST API SENDER (HTTPS Port 443 - Bypasses Render SMTP Block)
+// ============================================================
+async function sendViaGmailApi(to, from, subject, text, html) {
+  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: process.env.CLIENT_ID,
+      client_secret: process.env.CLIENT_SECRET,
+      refresh_token: process.env.REFRESH_TOKEN,
+      grant_type: "refresh_token",
+    }),
+  });
+
+  const tokenData = await tokenRes.json();
+  if (!tokenData.access_token) {
+    throw new Error(
+      `Failed to refresh Google access token: ${tokenData.error_description || tokenData.error || "Unknown error"}`
+    );
+  }
+
+  const raw = buildMimeMessage(to, from, subject, text, html);
+
+  const sendRes = await fetch(
+    "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${tokenData.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ raw }),
+    }
+  );
+
+  const sendData = await sendRes.json();
+  if (sendData.error) {
+    throw new Error(`Gmail API error: ${sendData.error.message || JSON.stringify(sendData.error)}`);
+  }
+
+  console.log("Email sent successfully via Gmail API (HTTPS):", sendData.id);
+  return sendData;
+}
+
+// ============================================================
+// OPTIONAL NODEMAILER FALLBACK (For environments with open SMTP)
+// ============================================================
+let smtpTransporter = null;
+if (process.env.EMAIL_PASS) {
+  smtpTransporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
-    }
-  : {
-      type: "OAuth2",
-      user: process.env.EMAIL_USER,
-      clientId: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      refreshToken: process.env.REFRESH_TOKEN,
-    };
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: authConfig,
-});
-
-// Verify email server connection on startup
-transporter.verify((error) => {
-  if (error) {
-    console.error("Email server connection note:", error.message || error);
-  } else {
-    console.log("Email server is ready to send messages");
-  }
-});
+    },
+  });
+}
 
 // ============================================================
 // COMMON SEND EMAIL FUNCTION
@@ -40,18 +105,27 @@ const sendEmail = async (to, subject, text, html) => {
       ? `"FinLedger" <${process.env.EMAIL_USER}>`
       : '"FinLedger Support" <no-reply@finledger.com>';
 
-    const info = await transporter.sendMail({
-      from: sender,
-      to,
-      subject,
-      text,
-      html,
-    });
+    // Prefer Gmail REST API over HTTPS (Port 443) since cloud providers (like Render) block SMTP ports (465/587)
+    if (process.env.CLIENT_ID && process.env.REFRESH_TOKEN) {
+      return await sendViaGmailApi(to, sender, subject, text, html);
+    }
 
-    console.log("Message sent:", info.messageId);
-    return info;
+    // Fallback to Nodemailer SMTP if EMAIL_PASS is provided
+    if (smtpTransporter) {
+      const info = await smtpTransporter.sendMail({
+        from: sender,
+        to,
+        subject,
+        text,
+        html,
+      });
+      console.log("Message sent via SMTP:", info.messageId);
+      return info;
+    }
+
+    throw new Error("No valid email configuration found (missing OAuth or App Password)");
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("Error sending email:", error.message || error);
     throw error;
   }
 };
@@ -120,7 +194,7 @@ FinLedger Team
     await sendEmail(email, subject, text, html);
     console.log("Registration email sent successfully");
   } catch (error) {
-    console.error("Registration email failed:", error);
+    console.error("Registration email failed:", error.message || error);
   }
 };
 
@@ -250,7 +324,7 @@ FinLedger Banking Team
     await sendEmail(userEmail, subject, text, html);
     console.log("Transaction email sent successfully");
   } catch (error) {
-    console.error("Transaction email failed:", error);
+    console.error("Transaction email failed:", error.message || error);
   }
 };
 
@@ -331,7 +405,7 @@ FinLedger Team
     await sendEmail(userEmail, subject, text, html);
     console.log("Transaction failure email sent successfully");
   } catch (error) {
-    console.error("Transaction failure email failed:", error);
+    console.error("Transaction failure email failed:", error.message || error);
   }
 };
 
