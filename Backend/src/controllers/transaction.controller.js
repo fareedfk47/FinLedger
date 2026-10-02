@@ -6,6 +6,7 @@ const transactionModel = require("../models/transaction.model");
 const ledgerModel = require("../models/ledger.model");
 const auditService = require("../services/audit.service");
 const auditLogModel = require("../models/auditLog.model");
+const emailService = require("../services/email.service");
 
 async function deposit(req, res) {
   const session = await mongoose.startSession();
@@ -193,6 +194,17 @@ async function deposit(req, res) {
     });
 
     const user = await userModel.findById(userId).select("name email");
+
+    if (user?.email) {
+      emailService.sendTransactionEmail(user.email, {
+        type: "deposit",
+        amount: depositAmount,
+        accountNumber: account.accountNumber,
+        balanceAfter: createdTransaction.balanceAfter,
+        description: cleanDescription,
+        date: createdTransaction.createdAt,
+      });
+    }
 
     return res.status(201).json({
       message: "Deposit successful",
@@ -453,6 +465,17 @@ async function withdraw(req, res) {
     });
 
     const user = await userModel.findById(userId).select("name email");
+
+    if (user?.email) {
+      emailService.sendTransactionEmail(user.email, {
+        type: "withdraw",
+        amount: withdrawAmount,
+        accountNumber: account.accountNumber,
+        balanceAfter: createdTransaction.balanceAfter,
+        description: cleanDescription,
+        date: createdTransaction.createdAt,
+      });
+    }
 
     return res.status(201).json({
       message: "Withdrawal successful",
@@ -951,6 +974,17 @@ async function transfer(req, res) {
     });
 
     const user = await userModel.findById(userId).select("name email");
+
+    if (user?.email) {
+      emailService.sendTransactionEmail(user.email, {
+        type: "transfer",
+        amount: transferAmount,
+        accountNumber: fromAccountNumber,
+        balanceAfter: createdTransaction.balanceAfter,
+        description: cleanDescription || `Transfer to ${toAccountNumber}`,
+        date: createdTransaction.createdAt,
+      });
+    }
 
     return res.status(201).json({
       message: "Transfer successful",
