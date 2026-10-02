@@ -2,17 +2,24 @@ require("dotenv").config();
 const nodemailer = require("nodemailer");
 
 // ============================================================
-// EMAIL TRANSPORTER (Gmail OAuth2)
+// EMAIL TRANSPORTER (Gmail App Password / OAuth2)
 // ============================================================
+const authConfig = process.env.EMAIL_PASS
+  ? {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    }
+  : {
+      type: "OAuth2",
+      user: process.env.EMAIL_USER,
+      clientId: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      refreshToken: process.env.REFRESH_TOKEN,
+    };
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
-  auth: {
-    type: "OAuth2",
-    user: process.env.EMAIL_USER,
-    clientId: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    refreshToken: process.env.REFRESH_TOKEN,
-  },
+  auth: authConfig,
 });
 
 // Verify email server connection on startup
