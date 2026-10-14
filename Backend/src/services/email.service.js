@@ -125,8 +125,8 @@ const sendEmail = async (to, subject, text, html) => {
 
     throw new Error("No valid email configuration found (missing OAuth or App Password)");
   } catch (error) {
-    console.error("Error sending email:", error.message || error);
-    throw error;
+    // Log but never rethrow — an email failure must never crash the API
+    console.error("Email service error (non-fatal):", error.message || error);
   }
 };
 
