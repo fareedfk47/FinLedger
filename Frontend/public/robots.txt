@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /register
+Disallow: /dashboard
+Disallow: /accounts
+Disallow: /transfer
+Disallow: /transactions
+Disallow: /ledger
+Disallow: /profile
+Disallow: /api/
+
+Sitemap: https://fin-ledger-kappa.vercel.app/sitemap.xml
